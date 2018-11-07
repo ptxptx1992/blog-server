@@ -1,0 +1,11 @@
+# mac os x
+.DS_Store
+
+# node 
+node_modules/
+
+# error log
+yarn-error.log
+
+# dist - Delete the ignore item when release
+
