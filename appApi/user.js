@@ -1,38 +1,22 @@
 const Router=require('koa-router')
 const bcrypt = require('bcrypt'); //引入bcrypt模块
 const db = require('./../database/init.js');
-const session = require('koa-session');
 let router=new Router();
-router.get('/cookie',async(ctx)=>{
-    // ctx.cookies.set(
-    //     'MyName','JSPang',{
-    //          // 写cookie所在的域名
-           
-    //         maxAge:1000*60*60*24,   // cookie有效时长
-    //         expires:new Date('2018-12-31'), // cookie失效时间
-    //         httpOnly:false,  // 是否只用于http请求中获取
-    //         overwrite:false  // 是否允许重写
-    //     }
-    // );
-
-    ctx.session.username = "张三";
-    ctx.body={
-        code:200,
-        message:'成功'
-    }
-})
+/**
+ * @api {POST}  /user/login 登录后台管理页面
+ * @apiName login
+ * @apiGroup user
+ * @apiVersion 1.0.0
+ * @apiDescription  登录
+ * @apiParam userName,loginpassword
+ * @apiParamExample {json} 请求参数示例:
+ * {"userName":13112345678,"loginpassword":1qaz2wsx}
+ * @apiSuccessExample {json} 成功返回值示例
+ * { "code" : 0, "message":"success" ,"data":{}}
+ * @apiErrorExample {json} 失败返回值示例
+ * { "code" : 500, "message":"error_message"}
+ */
 router.post('/login',async(ctx)=>{
-    ctx.cookies.set('userid',1111,{
-        domain:'.knowbox.cn:2018',
-        path:'/',
-        maxAge:1000*60*60*24,   // cookie有效时长
-        expires:new Date('2019-12-31'), // cookie失效时间
-        httpOnly:false,
-    });
-    ctx.body={
-        code:200,
-        message:'get it'
-    }
     let username=ctx.request.body.userName;
     let password=ctx.request.body.loginpassword;
     let params=[username];
@@ -44,13 +28,10 @@ router.post('/login',async(ctx)=>{
             }
         }else{
             if(bcrypt.compareSync(password,res[0].password)){
-                
-                
-                console.log(ctx.cookies.set)
                 ctx.body={
-                    code:200,
+                    code:0,
                     message:'登录成功',
-                    info:res[0]
+                    data:res[0]
                 }
                 }else{
                     ctx.body={
@@ -59,8 +40,27 @@ router.post('/login',async(ctx)=>{
                     }
                 }
         }
+    }).catch(err=>{
+        ctx.body={
+            code:500,
+            message:err
+        }
     })
 });
+/**
+ * @api {POST}  /user/register 注册后台管理平台账号
+ * @apiName register
+ * @apiGroup user
+ * @apiVersion 1.0.0
+ * @apiDescription  注册
+ * @apiParam nickname,phoneNumer,password
+ * @apiParamExample {json} 请求参数示例:
+ * {"nickname":小明,"phoneNumer":13876543210,"password":1qaz2wsx}
+ * @apiSuccessExample {json} 成功返回值示例
+ * { "code" : 0, "message":"success" ,"data":{}}
+ * @apiErrorExample {json} 失败返回值示例
+ * { "code" : 500, "message":"error_message"}
+ */
 router.post('/register',async(ctx)=>{
     let hash=bcrypt.hashSync(ctx.request.body.password,10);
     let params=[ctx.request.body.nickname,ctx.request.body.phoneNumer,hash];
@@ -73,8 +73,9 @@ router.post('/register',async(ctx)=>{
     }else{
         await db.query('INSERT INTO user(user_name,account,password) VALUES (?,?,?)',params).then((res)=>{
             ctx.body={
-                code:200,
-                message:'注册成功'
+                code:0,
+                message:'注册成功',
+                data:{},
             }
         }).catch(err=>{
             ctx.body={
