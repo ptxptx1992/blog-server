@@ -56,8 +56,8 @@ router.post('/add-article',async(ctx)=>{
 router.post('/get-article',async(ctx)=>{
     let id=ctx.request.body.id;
     let params=[id]
-    await db.query('select content,title,type from article_list where id = ?',params).then((res)=>{
-        
+    await db.query('select * from article_list where id = ? group by id',params).then((res)=>{
+        console.log(res)
         ctx.body={
             code:0,
             message:'success',
@@ -166,7 +166,7 @@ router.post('/export-article-list',async(ctx)=>{
             type:'string'
         }
     ]
-    await db.query('select * from article_list').then(async(res)=>{
+    await db.query('select * from article_list group by id').then(async(res)=>{
         let arr= [];
         res.map(element => {
            arr.push([element.id,element.title])

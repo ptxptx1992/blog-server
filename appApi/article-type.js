@@ -24,7 +24,7 @@ router.post('/type-list',async(ctx)=>{
         list:[],
         count:0,
     }
-    await db.query('select * from article_type limit ?,?',params).then((res)=>{
+    await db.query('select * from article_type group by id limit ?,? ',params).then((res)=>{
         let arr=[];
         res.map(val=>{
             arr.push({
@@ -63,13 +63,14 @@ router.post('/type-list-nopage',async(ctx)=>{
     let info={
         list:[],
     }
-    await db.query('select * from article_type').then((res)=>{
+    await db.query('select * from article_type group by id').then((res)=>{
         let arr=[];
         res.map(val=>{
             arr.push({
                 id:val.id,
                 key:val.id,
                 name:val.name,
+                
             })
         })
         info.list=arr;

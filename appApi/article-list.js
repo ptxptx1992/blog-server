@@ -27,7 +27,7 @@ router.post('/article-list',async(ctx)=>{
         list:[],
         count:0,
     }
-    let sql='select * from article_list';
+    let sql='select * from article_list ';
     if(articleType){
         params.push(articleType);
         if(sql.indexOf('where')>-1){
@@ -53,7 +53,7 @@ router.post('/article-list',async(ctx)=>{
             sql += ' where create_time between ? and ?'
         }
     }
-    sql += ' limit ?,?'
+    sql += ' group by id limit ?,? '
     params=[...params,(page-1)*pageSize,pageSize];
     
     await db.query(sql,params).then((res)=>{
@@ -79,9 +79,9 @@ router.post('/article-list',async(ctx)=>{
 
 });
 /**
- * @api {POST}  /article-list/article-list-nopage 获取文章列表
- * @apiName article-list
- * @apiGroup article_list
+ * @api {POST}  /article-list/article-list-nopage 获取文章列表-不分页
+ * @apiName article-list-nopage 
+ * @apiGroup article-list-nopage 
  * @apiVersion 1.0.0
  * @apiDescription 获取文章列表
  * @apiParam page,pageSize,articleType,articleStatus,startTime,endTime
@@ -93,13 +93,22 @@ router.post('/article-list',async(ctx)=>{
  * { "code" : 500, "message":"error_message"}
  */
 router.post('/article-list-nopage',async(ctx)=>{
+    let type=ctx.request.body.type;
+    let params=[]
+    let sql='select * from article_list where status != 3 group by id';
+    if(type){
+        sql='select * from article_list where status != 3 and type = ? group by id'
+        params.push(type)
+    }
     let arr=[];
-    await db.query('select * from article_list where status != 3').then((res)=>{
+    await db.query(sql,params).then((res)=>{
         res.map(val=>{
             arr.push({
                 id:val.id,
                 key:val.id,
                 title:val.title,
+                content:val.content,
+                time:val.create_time
             })
         });
         ctx.body={
@@ -109,4 +118,5 @@ router.post('/article-list-nopage',async(ctx)=>{
         }
     })
 });
+
 module.exports=router;

@@ -48,7 +48,7 @@ router.post('/message-list',async(ctx)=>{
             sql+=' where a.date between ? and ?'
         }
     }
-    sql+=' limit ?,?';
+    sql+=' group by b.id limit ?,?';
     params.push((page-1)*pageSize,pageSize);
     let info={};
     await db.query(sql,params).then((res)=>{
